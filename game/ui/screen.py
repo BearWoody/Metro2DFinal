@@ -165,8 +165,8 @@ def draw_ui():
         # Dark Overlay
         draw_overlay(208)
 
-        # Draw Game Over
-        draw_title("Game Over", colors.RED, f"Final Score: {int(manager.game_data.score)}", colors.WHITE)
+        # Draw Death UI
+        draw_dead()
 
 
 def draw_overlay(alpha):
@@ -230,6 +230,49 @@ def draw_inventory():
 
         item_count = get_font(32).render(f"{max(count, 0)}", True, colors.GREEN if count > 0 else colors.RED)
         s.blit(item_count, (x + background.get_width() - inner_spacing - item_count.get_width(), y + item_count.get_height() // 2))
+
+        y_offset += background.get_height() + spacing
+
+
+def draw_dead():
+    title = get_font(64).render("Game Over", True, colors.RED)
+    title_rect = title.get_rect(center=(s.get_width() // 2, (s.get_height() // 2) - (s.get_height() // 3)))
+    s.blit(title, title_rect)
+
+    subtitle = get_font(36).render(f"Your Score: {int(manager.game_data.score)}", True, colors.WHITE)
+    subtitle_rect = subtitle.get_rect(center=(s.get_width() // 2, (title_rect.center[1] + title_rect.height)))
+    s.blit(subtitle, subtitle_rect)
+
+    leaderboard = get_font(36).render("Leaderboard:", True, colors.ORANGE)
+    leaderboard_rect = leaderboard.get_rect(center=(s.get_width() // 2, (subtitle_rect.center[1] + subtitle_rect.height + 40)))
+    s.blit(leaderboard, leaderboard_rect)
+
+    spacing = 0
+    inner_spacing = 10
+    y_offset = 10
+    x_spacing = 100
+
+    position = 0
+    for score_data in manager.database.top_scores:
+        position += 1
+        name = score_data[0][:16]
+        score = score_data[1]
+        date = score_data[2].strftime("%Y-%m-%d")
+
+        x = title_rect.bottomleft[0] - x_spacing
+        y = leaderboard_rect.bottomleft[1] + spacing + y_offset
+
+        display_data = get_font(16).render(f"#{"{:02d}".format(position)} | {date} | {name}", True, colors.WHITE)
+        display_score = get_font(16).render(f"{max(score, 0)}", True, colors.ORANGE)
+
+        background = g.Surface((title_rect.width + 2*x_spacing, display_data.get_height() + 10), g.SRCALPHA)
+        background.fill((0, 0, 0, 192))
+
+        s.blit(background, (x, y))
+
+        s.blit(display_data, (x + inner_spacing, y + display_data.get_height() // 2))
+
+        s.blit(display_score, (x + background.get_width() - inner_spacing - display_score.get_width(), y + display_score.get_height() // 2))
 
         y_offset += background.get_height() + spacing
 

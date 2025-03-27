@@ -1,8 +1,11 @@
+import getpass
+
 import pygame as g
 
 import game.ui.screen as screen
 from game.data.game_data import GameData
 from game.data.game_state import GameState
+from game.repository.database import Database
 
 # PyGame Clock
 frames_per_second = 60
@@ -13,6 +16,10 @@ state: GameState = GameState.LOADING
 
 # Current Game
 game_data: GameData | None = None
+
+# Database
+database = Database("dbs.spskladno.cz", "vyuka41", "student41", "spsnet")
+player_name = getpass.getuser()
 
 
 def main():
@@ -55,6 +62,8 @@ def set_state(new_state: GameState):
     elif state == GameState.IN_GAME:
         game_data = GameData()
     elif state == GameState.DEAD:
+        database.add_score(player_name, int(game_data.score))
+        database.refresh_leaderboard()
         game_data.player.open_ui = None
 
 
